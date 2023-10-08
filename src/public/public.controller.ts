@@ -11,24 +11,19 @@ export class PublicController {
     return this.publicService.findAll(fileType)
   }
 
-  @Get(':id/fileLikes')
+  @Get(':id/comments')
+  getFileComments(@Param('id') fileId: number) {
+    return this.publicService.getFileComments(fileId)
+  }
+
+  @Get(':id/fileRating')
   getFileLikes(@Param('id') id: number) {
-    return this.publicService.getFileLikes(id)
+    return this.publicService.getFileRating(id)
   }
 
-  @Get(':id/fileDislikes')
-  getFileDislikes(@Param('id') id: number) {
-    return this.publicService.getFileDislikes(id)
-  }
-
-  @Get(':id/commentLikes')
+  @Get(':id/commentRating')
   getCommentLikes(@Param('id') id: number) {
-    return this.publicService.getCommentLikes(id)
-  }
-
-  @Get(':id/commentDislikes')
-  getCommentDislikes(@Param('id') id: number) {
-    return this.publicService.getCommentDislikes(id)
+    return this.publicService.getCommentRating(id)
   }
 
   @Get('/download/:userId/:fileName')

@@ -9,17 +9,17 @@ import * as bcrypt from 'bcrypt'
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private repository: Repository<UserEntity>,
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   async findByEmail(email: string) {
-    return this.repository.findOneBy({
+    return this.userRepository.findOneBy({
       email,
     })
   }
 
   findById(id: number) {
-    return this.repository.findOneBy({
+    return this.userRepository.findOneBy({
       id,
     })
   }
@@ -33,11 +33,11 @@ export class UsersService {
   async create(dto: CreateUserDto, activationCode: string) {
     dto.password = await this.hashPassword(dto.password)
     dto.activationCode = activationCode
-    return await this.repository.save(dto)
+    return await this.userRepository.save(dto)
   }
 
   async update(dto: CreateUserDto, email: string) {
-    const user = await this.repository.findOneBy({
+    const user = await this.userRepository.findOneBy({
       email,
     })
     if (!user) {
@@ -45,6 +45,6 @@ export class UsersService {
     }
 
     user.isEmailConfirmed = true
-    await this.repository.update(user.id, user)
+    await this.userRepository.update(user.id, user)
   }
 }

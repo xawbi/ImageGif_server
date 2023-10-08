@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { FileEntity, FileType } from '../files/entities/file.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CommentEntity } from '../comments/entities/comment.entity'
 import * as fs from 'fs'
+import { RatingEntity } from '../rating/entities/rating.entity'
 
 @Injectable()
 export class PublicService {
@@ -12,6 +13,8 @@ export class PublicService {
     private fileEntityRepository: Repository<FileEntity>,
     @InjectRepository(CommentEntity)
     private commentEntityRepository: Repository<CommentEntity>,
+    @InjectRepository(RatingEntity)
+    private ratingEntityRepository: Repository<RatingEntity>,
   ) {}
 
   findAll(fileType: FileType) {
@@ -38,40 +41,45 @@ export class PublicService {
     return qb.getMany()
   }
 
-  async getFileLikes(id: number) {
-    const file = await this.fileEntityRepository.findOne({ where: { id } })
-    if (!file) {
-      return null
-    }
-    return file.like
+  async getFileComments(id: number) {
+    const comments = await this.commentEntityRepository
+      .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoinAndSelect('user.avatar', 'avatar')
+      .where('comment.file = :id', { id })
+      .getMany()
+
+    return comments || []
   }
 
-  async getFileDislikes(id: number) {
-    const file = await this.fileEntityRepository.findOne({ where: { id } })
-    if (!file) {
-      return null
+  async getFileRating(id: number) {
+    const { likeSum, dislikeSum } = await this.ratingEntityRepository
+      .createQueryBuilder('rating')
+      .select('SUM(rating.like)', 'likeSum')
+      .addSelect('SUM(rating.dislike)', 'dislikeSum')
+      .where('rating.fileId = :id', { id: id })
+      .getRawOne()
+
+    if (likeSum === null || dislikeSum === null) {
+      throw new NotFoundException('File not found')
     }
-    return file.dislike
+
+    return { likeSum: parseInt(likeSum), dislikeSum: parseInt(dislikeSum) }
   }
 
-  async getCommentLikes(id: number) {
-    const comment = await this.commentEntityRepository.findOne({
-      where: { id },
-    })
-    if (!comment) {
-      return null
-    }
-    return comment.like
-  }
+  async getCommentRating(id: number) {
+    const { likeSum, dislikeSum } = await this.ratingEntityRepository
+      .createQueryBuilder('rating')
+      .select('SUM(rating.like)', 'likeSum')
+      .addSelect('SUM(rating.dislike)', 'dislikeSum')
+      .where('rating.commentId = :id', { id: id })
+      .getRawOne()
 
-  async getCommentDislikes(id: number) {
-    const comment = await this.commentEntityRepository.findOne({
-      where: { id },
-    })
-    if (!comment) {
-      return null
+    if (likeSum === null || dislikeSum === null) {
+      throw new NotFoundException('Comment not found')
     }
-    return comment.dislike
+
+    return { likeSum: parseInt(likeSum), dislikeSum: parseInt(dislikeSum) }
   }
 
   async downloadFile(userId: string, fileName: string, res) {

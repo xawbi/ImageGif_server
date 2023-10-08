@@ -55,6 +55,7 @@ export class FilesService {
   async delete(userId: number, id: number) {
     const file = await this.repository.findOne({
       where: { id, user: { id: userId } },
+      relations: ['comment'],
     })
     if (!file) {
       throw new NotFoundException('File not found')

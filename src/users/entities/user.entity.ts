@@ -39,6 +39,9 @@ export class UserEntity {
   })
   role: string
 
+  // @OneToMany(() => FavoritesEntity, favorites => favorites.user)
+  // favorites: FavoritesEntity[]
+
   @OneToMany(() => FileEntity, file => file.user)
   file: FileEntity[]
 

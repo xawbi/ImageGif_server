@@ -1,6 +1,4 @@
 import {
-  AfterLoad,
-  AfterUpdate,
   BeforeUpdate,
   Column,
   CreateDateColumn,
@@ -12,6 +10,7 @@ import {
 } from 'typeorm'
 import { UserEntity } from '../../users/entities/user.entity'
 import { CommentEntity } from '../../comments/entities/comment.entity'
+import { RatingEntity } from '../../rating/entities/rating.entity'
 
 export enum FileType {
   PHOTOS = 'photos',
@@ -19,10 +18,6 @@ export enum FileType {
   SENT = 'sent',
   PUBLIC = 'public',
 }
-
-// export enum filePublicFilter {
-//
-// }
 
 @Entity('files')
 export class FileEntity {
@@ -55,8 +50,24 @@ export class FileEntity {
   @ManyToOne(() => UserEntity, user => user.file)
   user: UserEntity
 
-  @OneToMany(() => CommentEntity, comment => comment.file)
+  // @OneToMany(() => FavoritesEntity, favorites => favorites.file, {
+  //   nullable: false,
+  //   onUpdate: 'CASCADE',
+  //   onDelete: 'CASCADE',
+  // })
+  // favorites: FavoritesEntity[]
+
+  @OneToMany(() => CommentEntity, comment => comment.file, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   comment: CommentEntity[]
+
+  @OneToMany(() => RatingEntity, rating => rating.file, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  rating: RatingEntity[]
 
   @Column({ default: 0 })
   like: number

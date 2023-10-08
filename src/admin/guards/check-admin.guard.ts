@@ -24,10 +24,6 @@ export class AdminGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const user = request.user
 
-    if (!user || user.role !== requiredRole) {
-      return false // Доступ запрещен, пользователь не является администратором
-    }
-
-    return true // Доступ разрешен
+    return !(!user || user.role !== requiredRole)
   }
 }

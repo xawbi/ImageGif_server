@@ -8,11 +8,11 @@ import { CommentEntity } from './entities/comment.entity'
 export class CommentsService {
   constructor(
     @InjectRepository(CommentEntity)
-    private fileEntityRepository: Repository<CommentEntity>,
+    private commentEntityRepository: Repository<CommentEntity>,
   ) {}
 
   create(dto: CreateCommentDto, userId) {
-    return this.fileEntityRepository.save({
+    return this.commentEntityRepository.save({
       text: dto.text,
       file: { id: dto.fileId },
       user: userId,
@@ -20,7 +20,7 @@ export class CommentsService {
   }
 
   async addLike(id: string) {
-    await this.fileEntityRepository
+    await this.commentEntityRepository
       .createQueryBuilder('file')
       .update()
       .set({ like: () => 'like + 1' })
@@ -29,7 +29,7 @@ export class CommentsService {
   }
 
   async addDislike(id: string) {
-    await this.fileEntityRepository
+    await this.commentEntityRepository
       .createQueryBuilder('file')
       .update()
       .set({ dislike: () => 'dislike + 1' })
@@ -38,7 +38,7 @@ export class CommentsService {
   }
 
   async removeLike(id: string) {
-    await this.fileEntityRepository
+    await this.commentEntityRepository
       .createQueryBuilder('file')
       .update()
       .set({ like: () => 'like - 1' })
@@ -47,7 +47,7 @@ export class CommentsService {
   }
 
   async removeDislike(id: string) {
-    await this.fileEntityRepository
+    await this.commentEntityRepository
       .createQueryBuilder('file')
       .update()
       .set({ dislike: () => 'dislike - 1' })

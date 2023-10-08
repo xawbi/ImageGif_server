@@ -40,7 +40,14 @@ export class AdminController {
   @Delete('files/:id/delete')
   @UseGuards(AdminGuard)
   @Roles(Role.Admin)
-  delete(@Param('id') id: string) {
-    return this.adminService.delete(id)
+  deleteFile(@Param('id') id: string) {
+    return this.adminService.deleteFile(id)
+  }
+
+  @Delete('comments/:id/delete')
+  @UseGuards(AdminGuard)
+  @Roles(Role.Admin)
+  deleteComment(@Param('id') id: string) {
+    return this.adminService.deleteComment(id)
   }
 }

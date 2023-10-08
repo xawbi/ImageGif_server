@@ -18,6 +18,8 @@ import { AvatarsModule } from './avatars/avatars.module'
 import { AvatarEntity } from './avatars/entities/avatar.entity'
 import { BgProfileModule } from './bg_profile/bg_profile.module'
 import { Bg_profileEntity } from './bg_profile/entities/bg_profile.entity'
+import { RatingModule } from './rating/rating.module'
+import { RatingEntity } from './rating/entities/rating.entity'
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { Bg_profileEntity } from './bg_profile/entities/bg_profile.entity'
         CommentEntity,
         AvatarEntity,
         Bg_profileEntity,
+        RatingEntity,
       ],
       synchronize: true,
     }),
@@ -50,6 +53,7 @@ import { Bg_profileEntity } from './bg_profile/entities/bg_profile.entity'
     CommentsModule,
     AvatarsModule,
     BgProfileModule,
+    RatingModule,
   ],
   controllers: [AppController],
   providers: [AppService, UserCleanupService],
