@@ -10,6 +10,7 @@ import { FileEntity } from '../../files/entities/file.entity'
 import { CommentEntity } from '../../comments/entities/comment.entity'
 import { AvatarEntity } from '../../avatars/entities/avatar.entity'
 import { Bg_profileEntity } from '../../bg_profile/entities/bg_profile.entity'
+import { FavoriteEntity } from '../../favorites/entities/favorite.entity'
 
 @Entity('users')
 export class UserEntity {
@@ -39,8 +40,8 @@ export class UserEntity {
   })
   role: string
 
-  // @OneToMany(() => FavoritesEntity, favorites => favorites.user)
-  // favorites: FavoritesEntity[]
+  @OneToMany(() => FavoriteEntity, favorites => favorites.user)
+  favorites: FavoriteEntity[]
 
   @OneToMany(() => FileEntity, file => file.user)
   file: FileEntity[]

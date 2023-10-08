@@ -11,6 +11,7 @@ import {
 import { UserEntity } from '../../users/entities/user.entity'
 import { CommentEntity } from '../../comments/entities/comment.entity'
 import { RatingEntity } from '../../rating/entities/rating.entity'
+import { FavoriteEntity } from '../../favorites/entities/favorite.entity'
 
 export enum FileType {
   PHOTOS = 'photos',
@@ -50,12 +51,12 @@ export class FileEntity {
   @ManyToOne(() => UserEntity, user => user.file)
   user: UserEntity
 
-  // @OneToMany(() => FavoritesEntity, favorites => favorites.file, {
-  //   nullable: false,
-  //   onUpdate: 'CASCADE',
-  //   onDelete: 'CASCADE',
-  // })
-  // favorites: FavoritesEntity[]
+  @OneToMany(() => FavoriteEntity, favorites => favorites.file, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  favorites: FavoriteEntity[]
 
   @OneToMany(() => CommentEntity, comment => comment.file, {
     onUpdate: 'CASCADE',
