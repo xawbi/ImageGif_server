@@ -71,10 +71,10 @@ export class FileEntity {
   rating: RatingEntity[]
 
   @Column({ default: 0 })
-  like: number
+  totalLike: number
 
   @Column({ default: 0 })
-  dislike: number
+  totalDislike: number
 
   @CreateDateColumn()
   createAt: Date

@@ -17,10 +17,14 @@ export class PublicService {
     private ratingEntityRepository: Repository<RatingEntity>,
   ) {}
 
-  findAll(fileType: FileType) {
+  async getFiles(fileType: FileType) {
     const qb = this.fileEntityRepository.createQueryBuilder('file')
 
     qb.leftJoinAndSelect('file.user', 'user')
+    qb.leftJoin('file.rating', 'rating').addSelect([
+      'rating.like',
+      'rating.dislike',
+    ])
 
     qb.where('file.restricted = :restricted', { restricted: 'public' })
 
@@ -36,9 +40,17 @@ export class PublicService {
       })
     }
 
-    qb.orderBy('file.restrictedUpdatedAt', 'DESC')
+    const files = await qb.getMany()
 
-    return qb.getMany()
+    files.map(file => {
+      file.totalLike = file.rating.reduce((acc, rating) => acc + rating.like, 0)
+      file.totalDislike = file.rating.reduce(
+        (acc, rating) => acc + rating.dislike,
+        0,
+      )
+    })
+
+    return files
   }
 
   async getFileComments(id: number) {

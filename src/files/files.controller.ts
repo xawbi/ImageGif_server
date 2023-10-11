@@ -55,24 +55,4 @@ export class FilesController {
   updateRestricted(@UserId() userId: number, @Param('id') id: string) {
     return this.filesService.updateRestricted(userId, id)
   }
-
-  @Patch(':id/addLike')
-  addLike(@Param('id') id: string) {
-    return this.filesService.addLike(id)
-  }
-
-  @Patch(':id/addDislike')
-  addDislike(@Param('id') id: string) {
-    return this.filesService.addDislike(id)
-  }
-
-  @Patch(':id/removeLike')
-  removeLike(@Param('id') id: string) {
-    return this.filesService.removeLike(id)
-  }
-
-  @Patch(':id/removeDislike')
-  removeDislike(@Param('id') id: string) {
-    return this.filesService.removeDislike(id)
-  }
 }

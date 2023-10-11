@@ -7,8 +7,8 @@ export class PublicController {
   constructor(private readonly publicService: PublicService) {}
 
   @Get('files')
-  findAll(@Query('type') fileType: FileType) {
-    return this.publicService.findAll(fileType)
+  getFiles(@Query('type') fileType: FileType) {
+    return this.publicService.getFiles(fileType)
   }
 
   @Get(':id/comments')
