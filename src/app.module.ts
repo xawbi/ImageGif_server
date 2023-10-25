@@ -22,12 +22,17 @@ import { RatingModule } from './rating/rating.module'
 import { RatingEntity } from './rating/entities/rating.entity'
 import { FavoritesModule } from './favorites/favorites.module'
 import { FavoriteEntity } from './favorites/entities/favorite.entity'
+import { MulterModule } from '@nestjs/platform-express'
+import { memoryStorage } from 'multer'
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
+    }),
+    MulterModule.register({
+      storage: memoryStorage(),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

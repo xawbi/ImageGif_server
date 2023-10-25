@@ -24,17 +24,23 @@ const generatePathName = (req, file, callback) => {
   callback(null, userFolderPath)
 }
 
-export const fileFilter = (req, file, callback) => {
-  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif']
-
-  if (allowedMimeTypes.includes(file.mimetype)) {
-    callback(null, true) // Принять файл
-  } else {
-    callback(new Error('Недопустимый тип файла')) // Отклонить файл
-  }
-}
+// export const fileFilter = (req, file, callback) => {
+//   const allowedMimeTypes = [
+//     'image/jpeg',
+//     'image/png',
+//     'image/gif',
+//     'image/bmp',
+//     'image/tiff',
+//     'image/webp',
+//   ]
+//
+//   if (allowedMimeTypes.includes(file.mimetype)) {
+//     callback(null, true)
+//   } else {
+//     callback(new Error('Недопустимый тип файла'))
+//   }
+// }
 
 export const fileStorage = diskStorage({
   destination: generatePathName,
-  filename: normalizeFileName,
 })

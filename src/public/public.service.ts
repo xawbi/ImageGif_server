@@ -96,7 +96,6 @@ export class PublicService {
 
   async downloadFile(userId: string, fileName: string, res) {
     const filePath = `uploads/${userId}/${fileName}`
-    console.log(filePath)
 
     if (!fs.existsSync(filePath)) {
       throw new Error('Файл не найден')

@@ -71,14 +71,15 @@ export class FilesService {
     await this.repository.delete({ id: id, user: { id: userId } })
   }
 
-  create(file: Express.Multer.File, userId: number) {
-    return this.repository.save({
-      fileName: file.filename,
-      originalName: file.originalname,
-      size: file.size,
-      mimetype: file.mimetype,
-      user: { id: userId },
-    })
+  create(file: string, userId: number) {
+    console.log(file)
+    // return this.repository.save({
+    //   fileName: file.filename,
+    //   originalName: file.originalname,
+    //   size: file.size,
+    //   mimetype: file.mimetype,
+    //   user: { id: userId },
+    // })
   }
 
   async updateRestricted(userId: number, id: string) {

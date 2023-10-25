@@ -10,11 +10,10 @@ import {
   Param,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { fileFilter } from '../files/storage'
 import { UserId } from '../decorators/user-id.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { bgProfileStorage } from './storage'
 import { Bg_profileService } from './bg_profile.service'
+import { fileFilter } from '../files/sharp.pipe'
 
 @Controller('bgProfile')
 @UseGuards(JwtAuthGuard)
@@ -24,11 +23,10 @@ export class Bg_profileController {
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: bgProfileStorage,
-      fileFilter,
       limits: {
         fileSize: 1024 * 1024 * 5,
       },
+      fileFilter,
     }),
   )
   create(@UploadedFile() file: Express.Multer.File, @UserId() userId: number) {

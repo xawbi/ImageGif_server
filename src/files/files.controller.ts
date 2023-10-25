@@ -10,18 +10,22 @@ import {
   Query,
   Patch,
   Param,
+  Inject,
 } from '@nestjs/common'
 import { FilesService } from './files.service'
-import { fileFilter, fileStorage } from './storage'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { UserId } from '../decorators/user-id.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { FileType } from './entities/file.entity'
+import { fileFilter, SharpPipe } from './sharp.pipe'
 
 @Controller('files')
 @UseGuards(JwtAuthGuard)
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(
+    private readonly filesService: FilesService,
+    @Inject(SharpPipe) private readonly sharpPipe: SharpPipe,
+  ) {}
 
   @Get()
   findAll(@UserId() userId: number, @Query('type') fileType: FileType) {
@@ -29,18 +33,29 @@ export class FilesController {
   }
 
   @Post()
+  // @UseInterceptors(
+  //   FileInterceptor('file', {
+  //     storage: fileStorage,
+  //     fileFilter,
+  //     limits: {
+  //       fileSize: 1024 * 1024 * 5,
+  //     },
+  //   }),
+  // )
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: fileStorage,
+      limits: { fileSize: 1024 * 1024 * 5 },
       fileFilter,
-      limits: {
-        fileSize: 1024 * 1024 * 5,
-      },
     }),
   )
-  create(@UploadedFile() file: Express.Multer.File, @UserId() userId: number) {
+  async create(
+    @UserId() userId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     try {
-      return this.filesService.create(file, userId)
+      global.userId = userId
+      const processedFile = await this.sharpPipe.transform(file)
+      return this.filesService.create(processedFile, userId)
     } catch (error) {
       throw new ForbiddenException()
     }

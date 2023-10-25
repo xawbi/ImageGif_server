@@ -12,11 +12,10 @@ import {
 } from '@nestjs/common'
 import { AvatarsService } from './avatars.service'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { fileFilter } from '../files/storage'
-import { avatarStorage } from './storage'
 import { UserId } from '../decorators/user-id.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CreateAvatarDto } from './dto/create-avatar.dto'
+import { fileFilter } from '../files/sharp.pipe'
 
 @Controller('avatars')
 @UseGuards(JwtAuthGuard)
@@ -26,11 +25,10 @@ export class AvatarsController {
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: avatarStorage,
-      fileFilter,
       limits: {
         fileSize: 1024 * 1024 * 5,
       },
+      fileFilter,
     }),
   )
   create(
