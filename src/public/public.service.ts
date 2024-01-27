@@ -5,6 +5,7 @@ import { Repository } from 'typeorm'
 import { CommentEntity } from '../comments/entities/comment.entity'
 import * as fs from 'fs'
 import { RatingEntity } from '../rating/entities/rating.entity'
+import * as path from 'path'
 
 @Injectable()
 export class PublicService {
@@ -18,48 +19,76 @@ export class PublicService {
   ) {}
 
   async getFiles(fileType: FileType) {
-    const qb = this.fileEntityRepository.createQueryBuilder('file')
+    const qbFile = this.fileEntityRepository.createQueryBuilder('file')
 
-    qb.leftJoinAndSelect('file.user', 'user')
-    qb.leftJoin('file.rating', 'rating').addSelect([
-      'rating.like',
-      'rating.dislike',
-    ])
+    qbFile.leftJoinAndSelect('file.user', 'user')
+    qbFile
+      .leftJoin('file.rating', 'rating')
+      .addSelect(['rating.like', 'rating.dislike'])
 
-    qb.where('file.restricted = :restricted', { restricted: 'public' })
+    qbFile.where('file.restricted = :restricted', { restricted: 'public' })
 
     if (fileType === FileType.PHOTOS) {
-      qb.andWhere('file.mimetype IN (:...types)', {
-        types: ['image/jpg', 'image/png', 'image/jpeg', 'image/webp'],
+      qbFile.andWhere('file.fileName LIKE :extensions', {
+        extensions: `%webp`,
       })
     }
 
     if (fileType === FileType.GIFS) {
-      qb.andWhere('file.mimetype IN (:...types)', {
-        types: ['image/gif'],
+      qbFile.andWhere('file.fileName LIKE :extensions', {
+        extensions: `%gif`,
       })
     }
 
-    const files = await qb.getMany()
-
-    files.map(file => {
-      file.totalLike = file.rating.reduce((acc, rating) => acc + rating.like, 0)
-      file.totalDislike = file.rating.reduce(
-        (acc, rating) => acc + rating.dislike,
-        0,
-      )
-    })
-
-    return files
+    return await qbFile
+      .leftJoinAndSelect('file.rating', 'fileRating')
+      .leftJoinAndSelect('fileRating.user', 'userRating')
+      .getMany()
   }
 
-  async getFileComments(id: number) {
+  async findFile(fileId: number) {
+    const qbFile = this.fileEntityRepository.createQueryBuilder('file')
+
+    if (!qbFile) {
+      throw new NotFoundException(`File with id ${fileId} not found`)
+    }
+
+    return await qbFile
+      .leftJoinAndSelect('file.user', 'user')
+      .leftJoin('file.rating', 'rating')
+      .addSelect(['rating.like', 'rating.dislike'])
+      .where('file.id = :fileId', { fileId })
+      .leftJoinAndSelect('file.rating', 'fileRating')
+      .leftJoinAndSelect('fileRating.user', 'userRating')
+      .getOne()
+  }
+
+  async getFileComments(id: number, parentCommentId: number = null) {
     const comments = await this.commentEntityRepository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
       .leftJoinAndSelect('user.avatar', 'avatar')
+      .leftJoinAndSelect('comment.childComments', 'childComments')
+      .leftJoinAndSelect('childComments.user', 'childUser')
+      .leftJoinAndSelect('childUser.avatar', 'childAvatar')
       .where('comment.file = :id', { id })
+      .andWhere(
+        parentCommentId
+          ? 'comment.parentComment = :parentId'
+          : 'comment.parentComment IS NULL',
+        {
+          parentId: parentCommentId,
+        },
+      )
+      .orderBy('comment.createAt', 'DESC')
       .getMany()
+
+    await Promise.all(
+      comments.map(async comment => {
+        comment.childComments = await this.getFileComments(id, comment.id)
+        comment.childCommentsCount = comment.childComments.length
+      }),
+    )
 
     return comments || []
   }
@@ -101,6 +130,14 @@ export class PublicService {
       throw new Error('Файл не найден')
     }
 
-    return res.download(filePath, fileName)
+    // Определите новое расширение в зависимости от оригинального расширения
+    const newExtension = path.extname(fileName) === '.webp' ? '.png' : '.gif'
+
+    // Измените имя файла, добавив новое расширение
+    const newFileName =
+      path.basename(fileName, path.extname(fileName)) + newExtension
+
+    // Отправьте файл на скачивание с новым именем
+    res.download(filePath, newFileName)
   }
 }

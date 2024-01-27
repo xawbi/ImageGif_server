@@ -28,21 +28,21 @@ export class SharpPipe
 {
   async transform(file: Express.Multer.File): Promise<string> {
     try {
-      const userId = global.userId
-      const originalName = path.parse(file.originalname).name
-      let filename =
-        uuid.v4() +
-        '-' +
-        (originalName.length > 10
-          ? originalName.substring(0, 10)
-          : originalName)
+      let filename = uuid.v4()
       if (file.mimetype !== 'image/gif') {
         filename += '.webp'
       } else filename += '.gif'
 
-      const uploadDirectory = `./uploads/${userId}`
+      const uploadDirectory = global.filePath
       if (!fs.existsSync(uploadDirectory)) {
         fs.mkdirSync(uploadDirectory, { recursive: true })
+      } else if (uploadDirectory.split('/')[1] !== `uploads`) {
+        const files = fs.readdirSync(uploadDirectory)
+        if (files.length > 0) {
+          files.map(file => {
+            fs.unlinkSync(`${uploadDirectory}/${file}`)
+          })
+        }
       }
 
       const metadataFile = await sharp(file.buffer).metadata()
@@ -75,7 +75,9 @@ export class SharpPipe
         fileStream.write(file.buffer)
       }
 
-      return `${filename} ${width} ${height} ${size}`
+      if (uploadDirectory.split('/')[1] !== `avatars`) {
+        return `${filename} ${width} ${height} ${size}`
+      } else return `${filename} ${size}`
     } catch (error) {
       console.error('Error in SharpPipe:', error)
       throw error

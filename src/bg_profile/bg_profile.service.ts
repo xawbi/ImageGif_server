@@ -11,28 +11,23 @@ export class Bg_profileService {
     private bgProfileRepository: Repository<Bg_profileEntity>,
   ) {}
 
-  create(file: Express.Multer.File, userId: number) {
-    const avatar = new Bg_profileEntity()
-    avatar.fileName = file.filename
-    avatar.originalName = file.originalname
-    avatar.size = file.size
-    avatar.mimetype = file.mimetype
-    avatar.user = { id: userId }
+  create(file: string, userId: number) {
+    const fileParams = file.split(' ')
+    const bgProfile = new Bg_profileEntity()
+    bgProfile.fileName = fileParams[0]
+    bgProfile.size = +fileParams[1]
+    bgProfile.user = { id: userId }
 
     return this.bgProfileRepository
       .find({ where: { user: { id: userId } } })
-      .then(existingAvatars => {
-        if (existingAvatars.length > 0) {
-          const existingAvatar = existingAvatars[0]
-          // Обновление аватарки
-          existingAvatar.fileName = avatar.fileName
-          existingAvatar.originalName = avatar.originalName
-          existingAvatar.size = avatar.size
-          existingAvatar.mimetype = avatar.mimetype
-          return this.bgProfileRepository.save(existingAvatar)
+      .then(existingBgProfiles => {
+        if (existingBgProfiles.length > 0) {
+          const existingBgProfile = existingBgProfiles[0]
+          existingBgProfile.fileName = bgProfile.fileName
+          existingBgProfile.size = bgProfile.size
+          return this.bgProfileRepository.save(existingBgProfile)
         } else {
-          // Создание новой аватарки
-          return this.bgProfileRepository.save(avatar)
+          return this.bgProfileRepository.save(bgProfile)
         }
       })
   }

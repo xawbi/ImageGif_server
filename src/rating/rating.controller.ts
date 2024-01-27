@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common'
 import { RatingService } from './rating.service'
 import { UserId } from '../decorators/user-id.decorator'
 import { CreateRatingDto } from './dto/create-rating.dto'
@@ -12,5 +12,13 @@ export class RatingController {
   @Post()
   createRatingFile(@Body() dto: CreateRatingDto, @UserId() userId: number) {
     return this.ratingService.createRating(userId, dto)
+  }
+
+  @Get('/check/:userId')
+  checkRatingExists(
+    @Body() dto: CreateRatingDto,
+    @Param('userId') userId: number,
+  ) {
+    return this.ratingService.checkRatingExists(dto, userId)
   }
 }

@@ -11,6 +11,11 @@ export class PublicController {
     return this.publicService.getFiles(fileType)
   }
 
+  @Get('file/:fileId')
+  findFile(@Param('fileId') fileId: number) {
+    return this.publicService.findFile(fileId)
+  }
+
   @Get(':id/comments')
   getFileComments(@Param('id') fileId: number) {
     return this.publicService.getFileComments(fileId)

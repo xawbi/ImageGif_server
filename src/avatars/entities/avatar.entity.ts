@@ -17,13 +17,7 @@ export class AvatarEntity {
   fileName: string
 
   @Column()
-  originalName: string
-
-  @Column()
   size: number
-
-  @Column()
-  mimetype: string
 
   @ManyToOne(() => UserEntity, user => user.avatar)
   user: { id: number }

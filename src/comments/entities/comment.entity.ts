@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -40,6 +41,22 @@ export class CommentEntity {
 
   @Column({ default: 0 })
   dislike: number
+
+  @Column({ default: 0 })
+  childCommentsCount: number
+
+  @ManyToOne(
+    () => CommentEntity,
+    parentComment => parentComment.childComments,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'parentCommentId' })
+  parentComment: CommentEntity
+
+  @OneToMany(() => CommentEntity, childComment => childComment.parentComment)
+  childComments: CommentEntity[]
 
   @CreateDateColumn()
   createAt: string

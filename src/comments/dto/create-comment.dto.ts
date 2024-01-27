@@ -6,4 +6,6 @@ export class CreateCommentDto {
 
   @IsNotEmpty()
   fileId: number
+
+  parentCommentId?: number
 }

@@ -19,12 +19,12 @@ export class FilesService {
     qb.where('file.userId = :userId', { userId })
 
     if (fileType === FileType.PHOTOS) {
-      qb.andWhere('file.mimetype IN (:...types)', {
-        types: ['image/jpg', 'image/png', 'image/jpeg', 'image/webp'],
+      qb.andWhere('file.fileName LIKE :extensions', {
+        extensions: `%webp`,
       })
     } else if (fileType === FileType.GIFS) {
-      qb.andWhere('file.mimetype IN (:...types)', {
-        types: ['image/gif'],
+      qb.andWhere('file.fileName LIKE :extensions', {
+        extensions: `%gif`,
       })
     } else if (fileType === FileType.SENT) {
       qb.andWhere('file.restricted IN (:...restricted)', {
@@ -72,14 +72,14 @@ export class FilesService {
   }
 
   create(file: string, userId: number) {
-    console.log(file)
-    // return this.repository.save({
-    //   fileName: file.filename,
-    //   originalName: file.originalname,
-    //   size: file.size,
-    //   mimetype: file.mimetype,
-    //   user: { id: userId },
-    // })
+    const fileParams = file.split(' ')
+    return this.repository.save({
+      fileName: fileParams[0],
+      width: +fileParams[1],
+      height: +fileParams[2],
+      size: +fileParams[3],
+      user: { id: userId },
+    })
   }
 
   async updateRestricted(userId: number, id: string) {

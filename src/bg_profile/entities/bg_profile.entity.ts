@@ -17,13 +17,7 @@ export class Bg_profileEntity {
   fileName: string
 
   @Column()
-  originalName: string
-
-  @Column()
   size: number
-
-  @Column()
-  mimetype: string
 
   @ManyToOne(() => UserEntity, user => user.bgProfile)
   user: { id: number }

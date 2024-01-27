@@ -75,4 +75,19 @@ export class RatingService {
       return this.ratingEntityRepository.save(newRating)
     }
   }
+
+  async checkRatingExists(dto: CreateRatingDto, userId: number) {
+    const ratingEntry = await this.ratingEntityRepository.findOne({
+      where: {
+        user: { id: userId },
+        file: { id: dto.targetId },
+        targetType: dto.targetType,
+      },
+    })
+    if (ratingEntry.like === 1 && dto.type === 'like') {
+      return true
+    } else if (ratingEntry.dislike === 1 && dto.type === 'dislike') {
+      return true
+    }
+  }
 }

@@ -4,6 +4,4 @@ export class CreateRatingDto {
   targetType: TargetTypeEnum
   type: TypeEnum
   targetId: number
-  // fileId?: number
-  // commentId?: number
 }

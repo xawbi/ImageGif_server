@@ -53,7 +53,7 @@ export class FilesController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     try {
-      global.userId = userId
+      global.filePath = `./uploads/${userId}`
       const processedFile = await this.sharpPipe.transform(file)
       return this.filesService.create(processedFile, userId)
     } catch (error) {

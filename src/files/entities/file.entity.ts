@@ -29,13 +29,13 @@ export class FileEntity {
   fileName: string
 
   @Column()
-  originalName: string
+  width: number
+
+  @Column()
+  height: number
 
   @Column()
   size: number
-
-  @Column()
-  mimetype: string
 
   @Column({
     type: 'enum',
@@ -70,11 +70,11 @@ export class FileEntity {
   })
   rating: RatingEntity[]
 
-  @Column({ default: 0 })
-  totalLike: number
+  @Column({ type: 'jsonb', default: [] })
+  totalLike: number[]
 
-  @Column({ default: 0 })
-  totalDislike: number
+  @Column({ type: 'jsonb', default: [] })
+  totalDislike: number[]
 
   @CreateDateColumn()
   createAt: Date

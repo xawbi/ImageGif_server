@@ -12,12 +12,11 @@ export class AvatarsService {
     private avatarRepository: Repository<AvatarEntity>,
   ) {}
 
-  create(file: Express.Multer.File, userId: number, dto: CreateAvatarDto) {
+  create(file: string, userId: number, dto: CreateAvatarDto) {
+    const fileParams = file.split(' ')
     const avatar = new AvatarEntity()
-    avatar.fileName = file.filename
-    avatar.originalName = file.originalname
-    avatar.size = file.size
-    avatar.mimetype = file.mimetype
+    avatar.fileName = fileParams[0]
+    avatar.size = +fileParams[1]
     avatar.user = { id: userId }
     avatar.x = dto.x
     avatar.y = dto.y
@@ -31,9 +30,7 @@ export class AvatarsService {
           const existingAvatar = existingAvatars[0]
           // Обновление аватарки
           existingAvatar.fileName = avatar.fileName
-          existingAvatar.originalName = avatar.originalName
           existingAvatar.size = avatar.size
-          existingAvatar.mimetype = avatar.mimetype
           existingAvatar.user = { id: userId }
           existingAvatar.x = dto.x
           existingAvatar.y = dto.y

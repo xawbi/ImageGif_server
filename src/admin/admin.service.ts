@@ -68,18 +68,4 @@ export class AdminService {
 
     await qb.delete().execute()
   }
-
-  async deleteComment(id: string) {
-    const qb = this.commentEntityRepository.createQueryBuilder('comment')
-
-    const comment = qb.where('id = :id', {
-      id: id,
-    })
-
-    if (comment === undefined) {
-      throw new NotFoundException('Comment not found')
-    }
-
-    await qb.delete().execute()
-  }
 }
