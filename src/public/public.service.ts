@@ -67,6 +67,8 @@ export class PublicService {
     const comments = await this.commentEntityRepository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
+      .leftJoinAndSelect('comment.parentComment', 'parentComment')
+      .leftJoinAndSelect('parentComment.user', 'parentCommentUser')
       .leftJoinAndSelect('user.avatar', 'avatar')
       .leftJoinAndSelect('comment.childComments', 'childComments')
       .leftJoinAndSelect('childComments.user', 'childUser')
