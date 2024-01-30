@@ -67,12 +67,16 @@ export class PublicService {
     const comments = await this.commentEntityRepository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
+      .leftJoin('comment.rating', 'rating')
+      .addSelect(['rating.like', 'rating.dislike'])
       .leftJoinAndSelect('comment.parentComment', 'parentComment')
       .leftJoinAndSelect('parentComment.user', 'parentCommentUser')
       .leftJoinAndSelect('user.avatar', 'avatar')
       .leftJoinAndSelect('comment.childComments', 'childComments')
       .leftJoinAndSelect('childComments.user', 'childUser')
       .leftJoinAndSelect('childUser.avatar', 'childAvatar')
+      .leftJoinAndSelect('comment.rating', 'commentRating')
+      .leftJoinAndSelect('commentRating.user', 'userRating')
       .where('comment.file = :id', { id })
       .andWhere(
         parentCommentId
