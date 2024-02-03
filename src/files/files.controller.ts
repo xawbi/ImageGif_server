@@ -11,6 +11,7 @@ import {
   Patch,
   Param,
   Inject,
+  Body,
 } from '@nestjs/common'
 import { FilesService } from './files.service'
 import { FileInterceptor } from '@nestjs/platform-express'
@@ -18,6 +19,7 @@ import { UserId } from '../decorators/user-id.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { FileType } from './entities/file.entity'
 import { fileFilter, SharpPipe } from './sharp.pipe'
+import { CreateFileDto } from './dto/create-file.dto'
 
 @Controller('files')
 @UseGuards(JwtAuthGuard)
@@ -58,7 +60,11 @@ export class FilesController {
   }
 
   @Patch(':id/updateRestricted')
-  updateRestricted(@UserId() userId: number, @Param('id') id: string) {
-    return this.filesService.updateRestricted(userId, id)
+  updateRestricted(
+    @UserId() userId: number,
+    @Param('id') id: string,
+    @Body() dto: CreateFileDto,
+  ) {
+    return this.filesService.updateRestricted(userId, id, dto)
   }
 }

@@ -70,12 +70,6 @@ export class FileEntity {
   })
   rating: RatingEntity[]
 
-  @Column({ type: 'jsonb', default: [] })
-  totalLike: number[]
-
-  @Column({ type: 'jsonb', default: [] })
-  totalDislike: number[]
-
   @CreateDateColumn()
   createAt: Date
 
@@ -84,6 +78,12 @@ export class FileEntity {
 
   @UpdateDateColumn()
   restrictedUpdatedAt: Date
+
+  @Column({ nullable: true })
+  postName: string
+
+  @Column({ nullable: true })
+  postDescription: string
 
   private previousRestricted: string
 

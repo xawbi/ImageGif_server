@@ -3,7 +3,6 @@ import {
   Post,
   Body,
   UseGuards,
-  Patch,
   Param,
   Delete,
 } from '@nestjs/common'
@@ -25,25 +24,5 @@ export class CommentsController {
   @Delete(':id/delete')
   deleteComment(@Param('id') id: string) {
     return this.commentsService.deleteComment(id)
-  }
-
-  @Patch(':id/addLike')
-  addLike(@Param('id') id: string) {
-    return this.commentsService.addLike(id)
-  }
-
-  @Patch(':id/addDislike')
-  addDislike(@Param('id') id: string) {
-    return this.commentsService.addDislike(id)
-  }
-
-  @Patch(':id/removeLike')
-  removeLike(@Param('id') id: string) {
-    return this.commentsService.removeLike(id)
-  }
-
-  @Patch(':id/removeDislike')
-  removeDislike(@Param('id') id: string) {
-    return this.commentsService.removeDislike(id)
   }
 }

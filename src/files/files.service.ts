@@ -3,6 +3,7 @@ import { FileEntity, FileType } from './entities/file.entity'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as fs from 'fs'
+import { CreateFileDto } from './dto/create-file.dto'
 
 @Injectable()
 export class FilesService {
@@ -11,7 +12,7 @@ export class FilesService {
     private repository: Repository<FileEntity>,
   ) {}
 
-  findAll(userId: number, fileType: FileType) {
+  async findAll(userId: number, fileType: FileType) {
     const qb = this.repository.createQueryBuilder('file')
 
     qb.leftJoinAndSelect('file.user', 'user')
@@ -71,7 +72,7 @@ export class FilesService {
     await this.repository.delete({ id: id, user: { id: userId } })
   }
 
-  create(file: string, userId: number) {
+  async create(file: string, userId: number) {
     const fileParams = file.split(' ')
     return this.repository.save({
       fileName: fileParams[0],
@@ -82,18 +83,34 @@ export class FilesService {
     })
   }
 
-  async updateRestricted(userId: number, id: string) {
+  async updateRestricted(userId: number, id: string, dto: CreateFileDto) {
     const qb = this.repository.createQueryBuilder('file')
 
-    qb.where('id = :id AND userId = :userId AND reject = :rejectPublic', {
-      id,
-      userId,
-      rejectPublic: false,
-    })
+    const file = qb.where(
+      'id = :id AND userId = :userId AND reject = :rejectPublic AND restricted = :restricted',
+      {
+        id,
+        userId,
+        rejectPublic: false,
+        restricted: 'private',
+      },
+    )
 
-    await qb
+    const normalizedPostName = dto.postName.replace(/\s+/g, ' ').trim()
+    const normalizedDescription = dto.postDescription
+      ? dto.postDescription.replace(/ {2,}|\n\n+/g, match =>
+          match[0] === ' ' ? ' ' : '\n\n',
+        )
+      : null
+
+    await file
       .update()
-      .set({ restricted: 'pending', restrictedUpdatedAt: new Date() })
+      .set({
+        restricted: 'pending',
+        restrictedUpdatedAt: new Date(),
+        postName: normalizedPostName,
+        postDescription: normalizedDescription,
+      })
       .execute()
   }
 }

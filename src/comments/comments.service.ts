@@ -71,40 +71,4 @@ export class CommentsService {
 
     await qb.delete().execute()
   }
-
-  async addLike(id: string) {
-    await this.commentEntityRepository
-      .createQueryBuilder('file')
-      .update()
-      .set({ like: () => 'like + 1' })
-      .where('id = :id', { id })
-      .execute()
-  }
-
-  async addDislike(id: string) {
-    await this.commentEntityRepository
-      .createQueryBuilder('file')
-      .update()
-      .set({ dislike: () => 'dislike + 1' })
-      .where('id = :id', { id })
-      .execute()
-  }
-
-  async removeLike(id: string) {
-    await this.commentEntityRepository
-      .createQueryBuilder('file')
-      .update()
-      .set({ like: () => 'like - 1' })
-      .where('id = :id', { id })
-      .execute()
-  }
-
-  async removeDislike(id: string) {
-    await this.commentEntityRepository
-      .createQueryBuilder('file')
-      .update()
-      .set({ dislike: () => 'dislike - 1' })
-      .where('id = :id', { id })
-      .execute()
-  }
 }
