@@ -43,6 +43,9 @@ export class PublicService {
     return await qbFile
       .leftJoinAndSelect('file.rating', 'fileRating')
       .leftJoinAndSelect('fileRating.user', 'userRating')
+      .leftJoinAndSelect('file.favorites', 'favorites')
+      .leftJoinAndSelect('favorites.user', 'userFavorite')
+      .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getMany()
   }
 
@@ -60,6 +63,9 @@ export class PublicService {
       .where('file.id = :fileId', { fileId })
       .leftJoinAndSelect('file.rating', 'fileRating')
       .leftJoinAndSelect('fileRating.user', 'userRating')
+      .leftJoinAndSelect('file.favorites', 'favorites')
+      .leftJoinAndSelect('favorites.user', 'userFavorite')
+      .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getOne()
   }
 
