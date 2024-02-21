@@ -17,7 +17,7 @@ import { FilesService } from './files.service'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { UserId } from '../decorators/user-id.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { FileType } from './entities/file.entity'
+import { FileSort, FileType } from './entities/file.entity'
 import { fileFilter, SharpPipe } from './sharp.pipe'
 import { CreateFileDto } from './dto/create-file.dto'
 
@@ -30,8 +30,12 @@ export class FilesController {
   ) {}
 
   @Get()
-  findAll(@UserId() userId: number, @Query('type') fileType: FileType) {
-    return this.filesService.findAll(userId, fileType)
+  findAll(
+    @UserId() userId: number,
+    @Query('type') fileType: FileType,
+    @Query('sort') fileSort: FileSort,
+  ) {
+    return this.filesService.findAll(userId, fileType, fileSort)
   }
 
   @Post()

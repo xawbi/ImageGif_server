@@ -28,10 +28,7 @@ export class SharpPipe
 {
   async transform(file: Express.Multer.File): Promise<string> {
     try {
-      let filename = uuid.v4()
-      if (file.mimetype !== 'image/gif') {
-        filename += '.webp'
-      } else filename += '.gif'
+      const filename: string = uuid.v4() + '.' + file.mimetype.split('/')[1]
 
       const uploadDirectory = global.filePath
       if (!fs.existsSync(uploadDirectory)) {
@@ -52,15 +49,14 @@ export class SharpPipe
 
       if (file.mimetype !== 'image/gif') {
         const result = await sharp(file.buffer)
-          .resize(800)
-          .webp({ effort: 3 })
+          .webp({ quality: 100 })
           .toFile(path.join(uploadDirectory, filename))
 
         width = result.width
         height = result.height
         size = result.size
       } else {
-        const gifFilePath = path.join(uploadDirectory, filename) // Генерируем уникальное имя файла
+        const gifFilePath = path.join(uploadDirectory, filename)
 
         diskStorage({
           destination: (req, file, callback) => {

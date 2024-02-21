@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { FileEntity, FileType } from './entities/file.entity'
+import { FileEntity, FileSort, FileType } from './entities/file.entity'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as fs from 'fs'
@@ -12,7 +12,7 @@ export class FilesService {
     private repository: Repository<FileEntity>,
   ) {}
 
-  async findAll(userId: number, fileType: FileType) {
+  async findAll(userId: number, fileType: FileType, fileSort: FileSort) {
     const qb = this.repository.createQueryBuilder('file')
 
     qb.leftJoinAndSelect('file.user', 'user')
@@ -37,21 +37,12 @@ export class FilesService {
       })
     }
 
-    qb.orderBy('file.updateAt', 'DESC')
+    fileSort === FileSort.OLDEST
+      ? qb.orderBy('file.updateAt', 'ASC')
+      : qb.orderBy('file.updateAt', 'DESC')
 
     return qb.getMany()
   }
-
-  // delete(userId: number, id: string) {
-  //   const qb = this.repository.createQueryBuilder('file')
-  //
-  //   qb.where('id = :id AND userId = :userId', {
-  //     id,
-  //     userId,
-  //   })
-  //
-  //   return qb.delete().execute()
-  // }
 
   async delete(userId: number, id: number) {
     const file = await this.repository.findOne({

@@ -1,5 +1,4 @@
 import {
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -18,6 +17,13 @@ export enum FileType {
   GIFS = 'gifs',
   SENT = 'sent',
   PUBLIC = 'public',
+}
+
+export enum FileSort {
+  OLDEST = 'oldest',
+  NEWEST = 'newest',
+  POPULAR = 'popular',
+  BEST = 'best',
 }
 
 @Entity('files')
@@ -44,6 +50,9 @@ export class FileEntity {
     nullable: false,
   })
   restricted: string
+
+  @Column({ default: 0 })
+  views: number
 
   @Column({ nullable: false, default: false })
   reject: boolean
@@ -76,7 +85,7 @@ export class FileEntity {
   @UpdateDateColumn()
   updateAt: Date
 
-  @UpdateDateColumn()
+  @Column({ nullable: true })
   restrictedUpdatedAt: Date
 
   @Column({ nullable: true })
@@ -84,13 +93,4 @@ export class FileEntity {
 
   @Column({ nullable: true })
   postDescription: string
-
-  private previousRestricted: string
-
-  @BeforeUpdate()
-  updateRestrictedUpdatedAt() {
-    if (this.restricted !== this.previousRestricted) {
-      this.restrictedUpdatedAt = new Date()
-    }
-  }
 }

@@ -1,14 +1,22 @@
-import { Controller, Get, Param, Query, Res } from '@nestjs/common'
+import { Controller, Get, Param, Patch, Post, Query, Res } from '@nestjs/common'
 import { PublicService } from './public.service'
-import { FileType } from '../files/entities/file.entity'
+import { FileSort, FileType } from '../files/entities/file.entity'
 
 @Controller('public')
 export class PublicController {
   constructor(private readonly publicService: PublicService) {}
 
   @Get('files')
-  getFiles(@Query('type') fileType: FileType) {
-    return this.publicService.getFiles(fileType)
+  getFiles(
+    @Query('type') fileType: FileType,
+    @Query('sort') fileSort: FileSort,
+  ) {
+    return this.publicService.getFiles(fileType, fileSort)
+  }
+
+  @Post('file/:fileId/updateView')
+  updateView(@Param('fileId') fileId: number) {
+    return this.publicService.updateView(fileId)
   }
 
   @Get('file/:fileId')

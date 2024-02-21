@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { FileEntity, FileType } from '../files/entities/file.entity'
+import { FileEntity, FileSort, FileType } from '../files/entities/file.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CommentEntity } from '../comments/entities/comment.entity'
 import * as fs from 'fs'
 import { RatingEntity } from '../rating/entities/rating.entity'
-import * as path from 'path'
 
 @Injectable()
 export class PublicService {
@@ -18,7 +17,19 @@ export class PublicService {
     private ratingEntityRepository: Repository<RatingEntity>,
   ) {}
 
-  async getFiles(fileType: FileType) {
+  async updateView(fileId: number) {
+    console.log('updateView')
+    const file = await this.fileEntityRepository.findOne({
+      where: { id: fileId },
+    })
+    if (!file) {
+      throw new NotFoundException(`File with id ${fileId} not found`)
+    }
+    file.views += 1
+    await this.fileEntityRepository.save(file)
+  }
+
+  async getFiles(fileType: FileType, fileSort: FileSort) {
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
 
     qbFile.leftJoinAndSelect('file.user', 'user')
@@ -38,6 +49,16 @@ export class PublicService {
       qbFile.andWhere('file.fileName LIKE :extensions', {
         extensions: `%gif`,
       })
+    }
+
+    if (fileSort === FileSort.OLDEST) {
+      qbFile.orderBy('file.restrictedUpdatedAt', 'ASC')
+    } else if (fileSort === FileSort.NEWEST) {
+      qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
+    } else if (fileSort === FileSort.POPULAR) {
+      qbFile.orderBy('file.views', 'DESC')
+    } else {
+      qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
     }
 
     return await qbFile
@@ -142,14 +163,6 @@ export class PublicService {
       throw new Error('Файл не найден')
     }
 
-    // Определите новое расширение в зависимости от оригинального расширения
-    const newExtension = path.extname(fileName) === '.webp' ? '.png' : '.gif'
-
-    // Измените имя файла, добавив новое расширение
-    const newFileName =
-      path.basename(fileName, path.extname(fileName)) + newExtension
-
-    // Отправьте файл на скачивание с новым именем
-    res.download(filePath, newFileName)
+    res.download(filePath, fileName)
   }
 }
