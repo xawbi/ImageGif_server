@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Bg_profileEntity } from './entities/bg_profile.entity'
@@ -36,6 +36,12 @@ export class Bg_profileService {
       .where('bgProfile.user.id = :userId', { userId })
       .getRawOne()
 
-    return bgProfile ? bgProfile.bgId : undefined
+    if (!bgProfile) {
+      throw new NotFoundException(
+        `Bg_profile for user with id ${userId} not found`,
+      )
+    }
+
+    return bgProfile.bgId
   }
 }
