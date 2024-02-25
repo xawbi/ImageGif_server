@@ -18,7 +18,6 @@ export class PublicService {
   ) {}
 
   async updateView(fileId: number) {
-    console.log('updateView')
     const file = await this.fileEntityRepository.findOne({
       where: { id: fileId },
     })
@@ -57,6 +56,8 @@ export class PublicService {
       qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
     } else if (fileSort === FileSort.POPULAR) {
       qbFile.orderBy('file.views', 'DESC')
+    } else if (fileSort === FileSort.RANDOM) {
+      qbFile.orderBy('RANDOM()')
     } else {
       qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
     }

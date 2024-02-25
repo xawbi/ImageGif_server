@@ -20,8 +20,8 @@ export class FilesService {
     qb.where('file.userId = :userId', { userId })
 
     if (fileType === FileType.PHOTOS) {
-      qb.andWhere('file.fileName LIKE :extensions', {
-        extensions: `%webp`,
+      qb.andWhere('file.fileName NOT LIKE :extensions', {
+        extensions: `%gif`,
       })
     } else if (fileType === FileType.GIFS) {
       qb.andWhere('file.fileName LIKE :extensions', {

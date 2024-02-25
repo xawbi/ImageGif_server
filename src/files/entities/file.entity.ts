@@ -24,6 +24,7 @@ export enum FileSort {
   NEWEST = 'newest',
   POPULAR = 'popular',
   BEST = 'best',
+  RANDOM = 'random',
 }
 
 @Entity('files')

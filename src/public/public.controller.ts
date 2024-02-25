@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Post, Query, Res } from '@nestjs/common'
+import { Controller, Get, Param, Post, Query, Res } from '@nestjs/common'
 import { PublicService } from './public.service'
 import { FileSort, FileType } from '../files/entities/file.entity'
 
