@@ -30,12 +30,12 @@ export class FilesController {
   ) {}
 
   @Get()
-  findAll(
+  getUserFiles(
     @UserId() userId: number,
     @Query('type') fileType: FileType,
     @Query('sort') fileSort: FileSort,
   ) {
-    return this.filesService.findAll(userId, fileType, fileSort)
+    return this.filesService.getUserFiles(userId, fileType, fileSort)
   }
 
   @Post()

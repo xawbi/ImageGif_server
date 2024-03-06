@@ -7,7 +7,11 @@ export class FavoriteEntity {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => UserEntity, user => user.favorites, { nullable: false })
+  @ManyToOne(() => UserEntity, user => user.favorites, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: UserEntity
 
   @ManyToOne(() => FileEntity, file => file.favorites, {

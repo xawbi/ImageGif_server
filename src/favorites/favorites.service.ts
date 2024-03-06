@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { FavoriteEntity } from './entities/favorite.entity'
 import { Repository } from 'typeorm'
-import { FileEntity } from '../files/entities/file.entity'
+import { FileEntity, FileSort } from '../files/entities/file.entity'
+import { UserEntity } from '../users/entities/user.entity'
 
 @Injectable()
 export class FavoritesService {
@@ -11,6 +12,8 @@ export class FavoritesService {
     private favoritesEntityRepository: Repository<FavoriteEntity>,
     @InjectRepository(FileEntity)
     private fileEntityRepository: Repository<FileEntity>,
+    @InjectRepository(UserEntity)
+    private userEntityRepository: Repository<UserEntity>,
   ) {}
 
   async addToFavorites(userId: number, fileId: number) {
@@ -40,12 +43,41 @@ export class FavoritesService {
     }
   }
 
-  async getFavorites(userId: number) {
-    return await this.favoritesEntityRepository
-      .createQueryBuilder('favorites')
+  async updateUserFavorites(userId: number) {
+    const user = await this.userEntityRepository.findOne({
+      where: { id: userId },
+    })
+    if (!user) {
+      throw new Error('User not found')
+    }
+    user.openFavorites = !user.openFavorites
+    await this.userEntityRepository.save(user)
+  }
+
+  async getFavorites(userId: number, fileSort: FileSort) {
+    const qbFile =
+      this.favoritesEntityRepository.createQueryBuilder('favorites')
+    qbFile
       .leftJoinAndSelect('favorites.file', 'file')
       .leftJoinAndSelect('file.user', 'user')
+      .addSelect(['user.id', 'user.username', 'user.role'])
       .where('favorites.userId = :id', { id: userId })
+      .leftJoin('file.rating', 'rating')
+      .addSelect(['rating.like', 'rating.dislike'])
+
+    if (fileSort === FileSort.OLDEST) {
+      qbFile.orderBy('file.restrictedUpdatedAt', 'ASC')
+    } else if (fileSort === FileSort.NEWEST) {
+      qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
+    } else if (fileSort === FileSort.POPULAR) {
+      qbFile.orderBy('file.views', 'DESC')
+    } else {
+      qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
+    }
+
+    return await qbFile
+      .leftJoin('rating.user', 'userRating')
+      .addSelect(['userRating.id', 'userRating.username', 'userRating.role'])
       .getMany()
   }
 

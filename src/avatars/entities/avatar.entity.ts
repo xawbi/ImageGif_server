@@ -19,7 +19,10 @@ export class AvatarEntity {
   @Column()
   size: number
 
-  @ManyToOne(() => UserEntity, user => user.avatar)
+  @ManyToOne(() => UserEntity, user => user.avatar, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: { id: number }
 
   @Column()

@@ -20,7 +20,11 @@ export class CommentEntity {
   @Column()
   text: string
 
-  @ManyToOne(() => UserEntity, user => user.comment, { nullable: false })
+  @ManyToOne(() => UserEntity, user => user.comment, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: UserEntity
 
   @ManyToOne(() => FileEntity, file => file.comment, {

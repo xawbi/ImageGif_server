@@ -19,7 +19,6 @@ import { CreateAvatarDto } from './dto/create-avatar.dto'
 import { fileFilter, SharpPipe } from '../files/sharp.pipe'
 
 @Controller('avatars')
-@UseGuards(JwtAuthGuard)
 export class AvatarsController {
   constructor(
     private readonly avatarsService: AvatarsService,
@@ -27,13 +26,14 @@ export class AvatarsController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: 1024 * 1024 * 5 },
       fileFilter,
     }),
   )
-  async create(
+  async postAvatar(
     @UploadedFile() file: Express.Multer.File,
     @UserId() userId: number,
     @Body() dto: CreateAvatarDto,
@@ -41,18 +41,25 @@ export class AvatarsController {
     try {
       global.filePath = `./avatars/${userId}`
       const processedAvatar = await this.sharpPipe.transform(file)
-      return this.avatarsService.create(processedAvatar, userId, dto)
+      return this.avatarsService.postAvatar(processedAvatar, userId, dto)
     } catch (error) {
       throw new ForbiddenException()
     }
   }
 
   @Get()
-  findAll(@UserId() userId: number) {
-    return this.avatarsService.findAll(userId)
+  @UseGuards(JwtAuthGuard)
+  getAvatar(@UserId() userId: number) {
+    return this.avatarsService.getAvatar(userId)
+  }
+
+  @Get('/public/:userId')
+  getAvatarPublic(@Param('userId') userId: number) {
+    return this.avatarsService.getAvatar(userId)
   }
 
   @Delete(':id/delete')
+  @UseGuards(JwtAuthGuard)
   delete(@UserId() userId: number, @Param('id') id: number) {
     return this.avatarsService.delete(userId, id)
   }

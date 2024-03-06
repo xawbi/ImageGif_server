@@ -28,26 +28,43 @@ export class PublicService {
     await this.fileEntityRepository.save(file)
   }
 
-  async getFiles(fileType: FileType, fileSort: FileSort) {
+  async searchPosts(postNameAndDesc: string) {
+    if (!postNameAndDesc.trim()) {
+      return []
+    }
+
+    // Разбиваем поисковую строку на отдельные слова
+    const searchTerms = postNameAndDesc.trim().split(/\s+/)
+
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
 
     qbFile.leftJoinAndSelect('file.user', 'user')
+    qbFile.where('file.restricted = :restricted', { restricted: 'public' })
+
+    // Добавляем условие для поиска по каждому слову отдельно
+    for (const term of searchTerms) {
+      qbFile.andWhere(
+        '(file.postName ILIKE :searchTerm OR file.postDescription ILIKE :searchTerm)',
+        { searchTerm: `%${term}%` },
+      )
+    }
+
+    // Возвращаем результаты поиска
+    return await qbFile.take(10).getMany()
+  }
+
+  async getFiles(fileType: FileType, fileSort: FileSort, userId?: number) {
+    const qbFile = this.fileEntityRepository.createQueryBuilder('file')
+
+    qbFile.leftJoin('file.user', 'user')
+    qbFile.addSelect(['user.id', 'user.username', 'user.role'])
     qbFile
       .leftJoin('file.rating', 'rating')
       .addSelect(['rating.like', 'rating.dislike'])
 
     qbFile.where('file.restricted = :restricted', { restricted: 'public' })
-
-    if (fileType === FileType.PHOTOS) {
-      qbFile.andWhere('file.fileName LIKE :extensions', {
-        extensions: `%webp`,
-      })
-    }
-
-    if (fileType === FileType.GIFS) {
-      qbFile.andWhere('file.fileName LIKE :extensions', {
-        extensions: `%gif`,
-      })
+    if (userId) {
+      qbFile.andWhere('file.userId = :userId', { userId })
     }
 
     if (fileSort === FileSort.OLDEST) {
@@ -63,10 +80,15 @@ export class PublicService {
     }
 
     return await qbFile
-      .leftJoinAndSelect('file.rating', 'fileRating')
-      .leftJoinAndSelect('fileRating.user', 'userRating')
+      .leftJoin('rating.user', 'userRating')
+      .addSelect(['userRating.id', 'userRating.username', 'userRating.role'])
       .leftJoinAndSelect('file.favorites', 'favorites')
-      .leftJoinAndSelect('favorites.user', 'userFavorite')
+      .leftJoin('favorites.user', 'userFavorite')
+      .addSelect([
+        'userFavorite.id',
+        'userFavorite.username',
+        'userFavorite.role',
+      ])
       .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getMany()
   }
@@ -79,14 +101,22 @@ export class PublicService {
     }
 
     return await qbFile
-      .leftJoinAndSelect('file.user', 'user')
-      .leftJoin('file.rating', 'rating')
-      .addSelect(['rating.like', 'rating.dislike'])
+      .leftJoin('file.user', 'user')
+      .addSelect(['user.id', 'user.username', 'user.role'])
+      .leftJoin('file.rating', 'fileRating')
+      .addSelect(['fileRating.like', 'fileRating.dislike'])
       .where('file.id = :fileId', { fileId })
-      .leftJoinAndSelect('file.rating', 'fileRating')
       .leftJoinAndSelect('fileRating.user', 'userRating')
+      .leftJoinAndSelect('user.avatar', 'avatar')
+      .leftJoin('avatar.user', 'userAvatar')
+      .addSelect(['userAvatar.id', 'userAvatar.username', 'userAvatar.role'])
       .leftJoinAndSelect('file.favorites', 'favorites')
       .leftJoinAndSelect('favorites.user', 'userFavorite')
+      .addSelect([
+        'userFavorite.id',
+        'userFavorite.username',
+        'userFavorite.role',
+      ])
       .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getOne()
   }
@@ -94,17 +124,27 @@ export class PublicService {
   async getFileComments(id: number, parentCommentId: number = null) {
     const comments = await this.commentEntityRepository
       .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoin('comment.user', 'user')
+      .addSelect(['user.id', 'user.username', 'user.role'])
       .leftJoin('comment.rating', 'rating')
       .addSelect(['rating.like', 'rating.dislike'])
       .leftJoinAndSelect('comment.parentComment', 'parentComment')
-      .leftJoinAndSelect('parentComment.user', 'parentCommentUser')
+      .leftJoin('parentComment.user', 'parentCommentUser')
+      .addSelect([
+        'parentCommentUser.id',
+        'parentCommentUser.username',
+        'parentCommentUser.role',
+      ])
       .leftJoinAndSelect('user.avatar', 'avatar')
+      .leftJoin('avatar.user', 'userAvatar')
+      .addSelect(['userAvatar.id', 'userAvatar.username', 'userAvatar.role'])
       .leftJoinAndSelect('comment.childComments', 'childComments')
-      .leftJoinAndSelect('childComments.user', 'childUser')
+      .leftJoin('childComments.user', 'childUser')
+      .addSelect(['childUser.id', 'childUser.username', 'childUser.role'])
       .leftJoinAndSelect('childUser.avatar', 'childAvatar')
       .leftJoinAndSelect('comment.rating', 'commentRating')
-      .leftJoinAndSelect('commentRating.user', 'userRating')
+      .leftJoin('commentRating.user', 'userRating')
+      .addSelect(['userRating.id', 'userRating.username', 'userRating.role'])
       .where('comment.file = :id', { id })
       .andWhere(
         parentCommentId

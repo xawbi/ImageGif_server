@@ -58,7 +58,10 @@ export class FileEntity {
   @Column({ nullable: false, default: false })
   reject: boolean
 
-  @ManyToOne(() => UserEntity, user => user.file)
+  @ManyToOne(() => UserEntity, user => user.file, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: UserEntity
 
   @OneToMany(() => FavoriteEntity, favorites => favorites.file, {

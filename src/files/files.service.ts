@@ -12,10 +12,14 @@ export class FilesService {
     private repository: Repository<FileEntity>,
   ) {}
 
-  async findAll(userId: number, fileType: FileType, fileSort: FileSort) {
+  async getUserFiles(userId: number, fileType: FileType, fileSort: FileSort) {
     const qb = this.repository.createQueryBuilder('file')
 
-    qb.leftJoinAndSelect('file.user', 'user')
+    qb.leftJoin('file.user', 'user').addSelect([
+      'user.id',
+      'user.username',
+      'user.role',
+    ])
 
     qb.where('file.userId = :userId', { userId })
 
@@ -38,8 +42,8 @@ export class FilesService {
     }
 
     fileSort === FileSort.OLDEST
-      ? qb.orderBy('file.updateAt', 'ASC')
-      : qb.orderBy('file.updateAt', 'DESC')
+      ? qb.orderBy('file.createAt', 'ASC')
+      : qb.orderBy('file.createAt', 'DESC')
 
     return qb.getMany()
   }

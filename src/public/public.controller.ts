@@ -14,6 +14,20 @@ export class PublicController {
     return this.publicService.getFiles(fileType, fileSort)
   }
 
+  @Get('/userFiles/:userId')
+  getUserFiles(
+    @Param('userId') userId: number,
+    @Query('type') fileType: FileType,
+    @Query('sort') fileSort: FileSort,
+  ) {
+    return this.publicService.getFiles(fileType, fileSort, userId)
+  }
+
+  @Post('searchPosts')
+  searchPosts(@Query('postNameAndDesc') postNameAndDesc: string) {
+    return this.publicService.searchPosts(postNameAndDesc)
+  }
+
   @Post('file/:fileId/updateView')
   updateView(@Param('fileId') fileId: number) {
     return this.publicService.updateView(fileId)

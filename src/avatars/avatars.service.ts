@@ -12,7 +12,7 @@ export class AvatarsService {
     private avatarRepository: Repository<AvatarEntity>,
   ) {}
 
-  create(file: string, userId: number, dto: CreateAvatarDto) {
+  postAvatar(file: string, userId: number, dto: CreateAvatarDto) {
     const fileParams = file.split(' ')
     const avatar = new AvatarEntity()
     avatar.fileName = fileParams[0]
@@ -44,10 +44,14 @@ export class AvatarsService {
       })
   }
 
-  async findAll(userId: number) {
+  async getAvatar(userId: number) {
     const qb = this.avatarRepository.createQueryBuilder('avatar')
 
-    qb.leftJoinAndSelect('avatar.user', 'user')
+    qb.leftJoin('avatar.user', 'user').addSelect([
+      'user.id',
+      'user.username',
+      'user.role',
+    ])
 
     qb.where('avatar.userId = :userId', { userId })
 

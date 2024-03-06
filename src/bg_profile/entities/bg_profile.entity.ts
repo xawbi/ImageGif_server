@@ -6,7 +6,10 @@ export class Bg_profileEntity {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => UserEntity, user => user.bgProfile)
+  @ManyToOne(() => UserEntity, user => user.bgProfile, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: { id: number }
 
   @Column({ default: 0 })

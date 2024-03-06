@@ -40,19 +40,37 @@ export class UserEntity {
   })
   role: string
 
-  @OneToMany(() => FavoriteEntity, favorites => favorites.user)
+  @OneToMany(() => FavoriteEntity, favorites => favorites.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   favorites: FavoriteEntity[]
 
-  @OneToMany(() => FileEntity, file => file.user)
+  @Column({ default: false })
+  openFavorites: boolean
+
+  @OneToMany(() => FileEntity, file => file.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   file: FileEntity[]
 
-  @OneToMany(() => CommentEntity, comment => comment.user)
+  @OneToMany(() => CommentEntity, comment => comment.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   comment: CommentEntity[]
 
-  @OneToMany(() => AvatarEntity, avatar => avatar.user)
+  @OneToMany(() => AvatarEntity, avatar => avatar.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   avatar: AvatarEntity
 
-  @OneToMany(() => Bg_profileEntity, bgProfile => bgProfile.user)
+  @OneToMany(() => Bg_profileEntity, bgProfile => bgProfile.user, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   bgProfile: Bg_profileEntity
 
   @CreateDateColumn()

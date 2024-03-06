@@ -18,10 +18,18 @@ export class UsersService {
     })
   }
 
-  findById(id: number) {
-    return this.userRepository.findOneBy({
-      id,
-    })
+  async findById(id: number) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.username', 'user.role', 'user.openFavorites'])
+      .where('user.id = :id', { id })
+      .getOne()
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    return user
   }
 
   async hashPassword(password: string): Promise<string> {
