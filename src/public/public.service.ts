@@ -53,19 +53,21 @@ export class PublicService {
     return await qbFile.take(10).getMany()
   }
 
-  async getFiles(fileType: FileType, fileSort: FileSort, userId?: number) {
+  async getFiles(fileType, fileSort, page, per_page, userId?) {
+    const offset = (+page - 1) * +per_page
+
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
 
-    qbFile.leftJoin('file.user', 'user')
-    qbFile.addSelect(['user.id', 'user.username', 'user.role'])
-    qbFile
-      .leftJoin('file.rating', 'rating')
-      .addSelect(['rating.like', 'rating.dislike'])
-
-    qbFile.where('file.restricted = :restricted', { restricted: 'public' })
     if (userId) {
       qbFile.andWhere('file.userId = :userId', { userId })
     }
+
+    qbFile
+      .leftJoin('file.user', 'user')
+      .addSelect(['user.id', 'user.username', 'user.role'])
+      .leftJoin('file.rating', 'rating')
+      .addSelect(['rating.like', 'rating.dislike'])
+      .where('file.restricted = :restricted', { restricted: 'public' })
 
     if (fileSort === FileSort.OLDEST) {
       qbFile.orderBy('file.restrictedUpdatedAt', 'ASC')
@@ -78,6 +80,8 @@ export class PublicService {
     } else {
       qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
     }
+
+    qbFile.skip(offset).take(+per_page)
 
     return await qbFile
       .leftJoin('rating.user', 'userRating')

@@ -19,8 +19,11 @@ export class AdminController {
   @Get('files/pending')
   @UseGuards(AdminGuard)
   @Roles(Role.Admin)
-  getFilesPending() {
-    return this.adminService.getFilesPending()
+  getFilesPending(
+    @Query('page') page: number,
+    @Query('per_page') per_page: number,
+  ) {
+    return this.adminService.getFilesPending(page, per_page)
   }
 
   @Patch('files/updateRestricted')

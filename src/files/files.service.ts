@@ -12,16 +12,20 @@ export class FilesService {
     private repository: Repository<FileEntity>,
   ) {}
 
-  async getUserFiles(userId: number, fileType: FileType, fileSort: FileSort) {
+  async getUserFiles(
+    userId: number,
+    fileType: FileType,
+    fileSort: FileSort,
+    page: number,
+    per_page: number,
+  ) {
+    const offset = (+page - 1) * +per_page
+
     const qb = this.repository.createQueryBuilder('file')
 
-    qb.leftJoin('file.user', 'user').addSelect([
-      'user.id',
-      'user.username',
-      'user.role',
-    ])
-
     qb.where('file.userId = :userId', { userId })
+      .leftJoin('file.user', 'user')
+      .addSelect(['user.id', 'user.username', 'user.role'])
 
     if (fileType === FileType.PHOTOS) {
       qb.andWhere('file.fileName NOT LIKE :extensions', {
@@ -45,7 +49,7 @@ export class FilesService {
       ? qb.orderBy('file.createAt', 'ASC')
       : qb.orderBy('file.createAt', 'DESC')
 
-    return qb.getMany()
+    return qb.skip(offset).take(+per_page).getMany()
   }
 
   async delete(userId: number, id: number) {

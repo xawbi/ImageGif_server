@@ -34,8 +34,16 @@ export class FilesController {
     @UserId() userId: number,
     @Query('type') fileType: FileType,
     @Query('sort') fileSort: FileSort,
+    @Query('page') page: number,
+    @Query('per_page') per_page: number,
   ) {
-    return this.filesService.getUserFiles(userId, fileType, fileSort)
+    return this.filesService.getUserFiles(
+      userId,
+      fileType,
+      fileSort,
+      page,
+      per_page,
+    )
   }
 
   @Post()

@@ -13,7 +13,8 @@ export class AdminService {
     private commentEntityRepository: Repository<CommentEntity>,
   ) {}
 
-  getFilesPending() {
+  getFilesPending(page: number, per_page: number) {
+    const offset = (+page - 1) * +per_page
     const qb = this.fileEntityRepository.createQueryBuilder('file')
 
     qb.leftJoinAndSelect('file.user', 'user')
@@ -22,7 +23,7 @@ export class AdminService {
 
     qb.orderBy('file.updateAt', 'ASC')
 
-    return qb.getMany()
+    return qb.skip(offset).take(+per_page).getMany()
   }
 
   async updateRestricted(ids: string) {
