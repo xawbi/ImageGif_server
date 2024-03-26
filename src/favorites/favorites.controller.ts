@@ -25,8 +25,13 @@ export class FavoritesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  getFavorites(@UserId() userId: number, @Query('sort') fileSort: FileSort) {
-    return this.favoritesService.getFavorites(userId, fileSort)
+  getFavorites(
+    @UserId() userId: number,
+    @Query('sort') fileSort: FileSort,
+    @Query('page') page: number,
+    @Query('per_page') per_page: number,
+  ) {
+    return this.favoritesService.getFavorites(userId, fileSort, page, per_page)
   }
 
   @Patch('/updateUserFavorites')
@@ -39,8 +44,10 @@ export class FavoritesController {
   getFavoritesPublic(
     @Param('userId') userId: number,
     @Query('sort') fileSort: FileSort,
+    @Query('page') page: number,
+    @Query('per_page') per_page: number,
   ) {
-    return this.favoritesService.getFavorites(userId, fileSort)
+    return this.favoritesService.getFavorites(userId, fileSort, page, per_page)
   }
 
   @Delete('delete/:id')

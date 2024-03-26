@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { FileEntity, FileSort, FileType } from '../files/entities/file.entity'
+import { FileEntity, FileSort } from '../files/entities/file.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CommentEntity } from '../comments/entities/comment.entity'
 import * as fs from 'fs'
 import { RatingEntity } from '../rating/entities/rating.entity'
+import { shuffle } from 'lodash'
 
 @Injectable()
 export class PublicService {
@@ -32,35 +33,24 @@ export class PublicService {
     if (!postNameAndDesc.trim()) {
       return []
     }
-
-    // Разбиваем поисковую строку на отдельные слова
     const searchTerms = postNameAndDesc.trim().split(/\s+/)
-
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
-
     qbFile.leftJoinAndSelect('file.user', 'user')
     qbFile.where('file.restricted = :restricted', { restricted: 'public' })
-
-    // Добавляем условие для поиска по каждому слову отдельно
     for (const term of searchTerms) {
       qbFile.andWhere(
         '(file.postName ILIKE :searchTerm OR file.postDescription ILIKE :searchTerm)',
         { searchTerm: `%${term}%` },
       )
     }
-
     // Возвращаем результаты поиска
     return await qbFile.take(10).getMany()
   }
 
-  async getFiles(fileType, fileSort, page, per_page, userId?) {
+  async getFiles(fileSort, page, per_page, userId?) {
     const offset = (+page - 1) * +per_page
 
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
-
-    if (userId) {
-      qbFile.andWhere('file.userId = :userId', { userId })
-    }
 
     qbFile
       .leftJoin('file.user', 'user')
@@ -68,6 +58,10 @@ export class PublicService {
       .leftJoin('file.rating', 'rating')
       .addSelect(['rating.like', 'rating.dislike'])
       .where('file.restricted = :restricted', { restricted: 'public' })
+
+    if (userId) {
+      qbFile.andWhere('file.user.id = :userId', { userId })
+    }
 
     if (fileSort === FileSort.OLDEST) {
       qbFile.orderBy('file.restrictedUpdatedAt', 'ASC')
@@ -77,13 +71,9 @@ export class PublicService {
       qbFile.orderBy('file.views', 'DESC')
     } else if (fileSort === FileSort.RANDOM) {
       qbFile.orderBy('RANDOM()')
-    } else {
-      qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
     }
 
-    qbFile.skip(offset).take(+per_page)
-
-    return await qbFile
+    const files = await qbFile
       .leftJoin('rating.user', 'userRating')
       .addSelect(['userRating.id', 'userRating.username', 'userRating.role'])
       .leftJoinAndSelect('file.favorites', 'favorites')
@@ -95,6 +85,11 @@ export class PublicService {
       ])
       .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getMany()
+    const remainingItems = files.length - offset
+    const itemsToShowOnLastPage = Math.min(per_page, remainingItems)
+    return fileSort === FileSort.RANDOM
+      ? shuffle(files).slice(offset, offset + itemsToShowOnLastPage)
+      : files.slice(offset, offset + itemsToShowOnLastPage)
   }
 
   async findFile(fileId: number) {

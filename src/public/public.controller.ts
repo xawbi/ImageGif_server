@@ -13,24 +13,17 @@ export class PublicController {
     @Query('page') page: number,
     @Query('per_page') per_page: number,
   ) {
-    return this.publicService.getFiles(fileType, fileSort, page, per_page)
+    return this.publicService.getFiles(fileSort, page, per_page, fileType)
   }
 
   @Get('/userFiles/:userId')
   getUserFiles(
     @Param('userId') userId: number,
-    @Query('type') fileType: FileType,
     @Query('sort') fileSort: FileSort,
     @Query('page') page: number,
     @Query('per_page') per_page: number,
   ) {
-    return this.publicService.getFiles(
-      fileType,
-      fileSort,
-      page,
-      per_page,
-      userId,
-    )
+    return this.publicService.getFiles(fileSort, page, per_page, userId)
   }
 
   @Post('searchPosts')

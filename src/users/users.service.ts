@@ -24,11 +24,9 @@ export class UsersService {
       .select(['user.id', 'user.username', 'user.role', 'user.openFavorites'])
       .where('user.id = :id', { id })
       .getOne()
-
     if (!user) {
       throw new Error('User not found')
     }
-
     return user
   }
 

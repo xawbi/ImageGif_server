@@ -57,17 +57,8 @@ export class SharpPipe
         size = result.size
       } else {
         const gifFilePath = path.join(uploadDirectory, filename)
-
-        diskStorage({
-          destination: (req, file, callback) => {
-            callback(null, uploadDirectory)
-          },
-          filename: (req, file, callback) => {
-            callback(null, filename)
-          },
-        })
-
         const fileStream = fs.createWriteStream(gifFilePath)
+
         fileStream.write(file.buffer)
       }
 

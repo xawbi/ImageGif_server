@@ -54,7 +54,9 @@ export class FavoritesService {
     await this.userEntityRepository.save(user)
   }
 
-  async getFavorites(userId: number, fileSort: FileSort) {
+  async getFavorites(userId: number, fileSort: FileSort, page, per_page) {
+    const offset = (+page - 1) * +per_page
+
     const qbFile =
       this.favoritesEntityRepository.createQueryBuilder('favorites')
     qbFile
@@ -75,10 +77,14 @@ export class FavoritesService {
       qbFile.orderBy('file.restrictedUpdatedAt', 'DESC')
     }
 
-    return await qbFile
+    qbFile.skip(offset).take(+per_page)
+
+    const favorites = await qbFile
       .leftJoin('rating.user', 'userRating')
       .addSelect(['userRating.id', 'userRating.username', 'userRating.role'])
       .getMany()
+
+    return favorites.map(favorite => favorite.file)
   }
 
   async delFavorite(userId: number, id: number) {

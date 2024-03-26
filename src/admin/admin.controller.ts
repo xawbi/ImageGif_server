@@ -26,6 +26,20 @@ export class AdminController {
     return this.adminService.getFilesPending(page, per_page)
   }
 
+  @Get('users')
+  @UseGuards(AdminGuard)
+  @Roles(Role.Admin)
+  getUsers() {
+    return this.adminService.getUsers()
+  }
+
+  @Patch('user/ban')
+  @UseGuards(AdminGuard)
+  @Roles(Role.Admin)
+  updateUserBan(@Query('ids') ids: string) {
+    return this.adminService.updateUserBan(ids)
+  }
+
   @Patch('files/updateRestricted')
   @UseGuards(AdminGuard)
   @Roles(Role.Admin)

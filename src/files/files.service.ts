@@ -20,13 +20,10 @@ export class FilesService {
     per_page: number,
   ) {
     const offset = (+page - 1) * +per_page
-
     const qb = this.repository.createQueryBuilder('file')
-
     qb.where('file.userId = :userId', { userId })
       .leftJoin('file.user', 'user')
       .addSelect(['user.id', 'user.username', 'user.role'])
-
     if (fileType === FileType.PHOTOS) {
       qb.andWhere('file.fileName NOT LIKE :extensions', {
         extensions: `%gif`,
@@ -44,11 +41,9 @@ export class FilesService {
         restricted: ['public'],
       })
     }
-
     fileSort === FileSort.OLDEST
       ? qb.orderBy('file.createAt', 'ASC')
       : qb.orderBy('file.createAt', 'DESC')
-
     return qb.skip(offset).take(+per_page).getMany()
   }
 
@@ -60,14 +55,10 @@ export class FilesService {
     if (!file) {
       throw new NotFoundException('File not found')
     }
-
-    // Удаление файла из файловой системы
     const filePath = `uploads/${userId}/${file.fileName}`
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)
     }
-
-    // Удаление записи файла из базы данных
     await this.repository.delete({ id: id, user: { id: userId } })
   }
 
@@ -84,7 +75,6 @@ export class FilesService {
 
   async updateRestricted(userId: number, id: string, dto: CreateFileDto) {
     const qb = this.repository.createQueryBuilder('file')
-
     const file = qb.where(
       'id = :id AND userId = :userId AND reject = :rejectPublic AND restricted = :restricted',
       {
@@ -94,14 +84,12 @@ export class FilesService {
         restricted: 'private',
       },
     )
-
     const normalizedPostName = dto.postName.replace(/\s+/g, ' ').trim()
     const normalizedDescription = dto.postDescription
       ? dto.postDescription.replace(/ {2,}|\n\n+/g, match =>
           match[0] === ' ' ? ' ' : '\n\n',
         )
       : null
-
     await file
       .update()
       .set({

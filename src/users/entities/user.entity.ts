@@ -78,4 +78,10 @@ export class UserEntity {
 
   @UpdateDateColumn()
   updateAt: Date
+
+  @Column({
+    default: false,
+    nullable: false,
+  })
+  ban: boolean
 }
