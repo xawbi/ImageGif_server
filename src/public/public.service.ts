@@ -47,7 +47,7 @@ export class PublicService {
     return await qbFile.take(10).getMany()
   }
 
-  async getFiles(fileSort, page, per_page, userId?) {
+  async getFiles(userId, allType, fileSort, page, per_page) {
     const offset = (+page - 1) * +per_page
 
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
@@ -57,10 +57,14 @@ export class PublicService {
       .addSelect(['user.id', 'user.username', 'user.role'])
       .leftJoin('file.rating', 'rating')
       .addSelect(['rating.like', 'rating.dislike'])
-      .where('file.restricted = :restricted', { restricted: 'public' })
 
     if (userId) {
-      qbFile.andWhere('file.user.id = :userId', { userId })
+      qbFile.where('file.userId = :userId AND file.restricted = :restricted', {
+        userId: userId,
+        restricted: 'public',
+      })
+    } else {
+      qbFile.where('file.restricted = :restricted', { restricted: 'public' })
     }
 
     if (fileSort === FileSort.OLDEST) {
@@ -85,6 +89,11 @@ export class PublicService {
       ])
       .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getMany()
+
+    if (allType === 'yes') {
+      return files
+    }
+
     const remainingItems = files.length - offset
     const itemsToShowOnLastPage = Math.min(per_page, remainingItems)
     return fileSort === FileSort.RANDOM
@@ -120,8 +129,14 @@ export class PublicService {
       .getOne()
   }
 
-  async getFileComments(id: number, parentCommentId: number = null) {
-    const comments = await this.commentEntityRepository
+  async getFileComments(
+    id: number,
+    page: number,
+    per_page: number,
+    parentCommentId: number = null,
+  ) {
+    const offset = (+page - 1) * +per_page
+    const qb = await this.commentEntityRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
       .addSelect(['user.id', 'user.username', 'user.role'])
@@ -154,16 +169,43 @@ export class PublicService {
         },
       )
       .orderBy('comment.createAt', 'DESC')
-      .getMany()
+
+    if (parentCommentId === null) {
+      qb.skip(offset).take(+per_page)
+    }
+
+    const comments = await qb.getMany()
 
     await Promise.all(
       comments.map(async comment => {
-        comment.childComments = await this.getFileComments(id, comment.id)
+        comment.childComments = await this.getFileComments(
+          id,
+          page,
+          per_page,
+          comment.id,
+        )
         comment.childCommentsCount = comment.childComments.length
       }),
     )
 
     return comments || []
+  }
+
+  async getFileCommentsLength(id: number) {
+    const comments = await this.commentEntityRepository
+      .createQueryBuilder('comment')
+      .where('comment.file = :id', { id })
+      .getMany()
+
+    const mainComments = await this.commentEntityRepository
+      .createQueryBuilder('comment')
+      .where('comment.file = :id AND comment.parentCommentId IS NULL', { id })
+      .getMany()
+
+    return {
+      totalComments: comments.length,
+      totalMainComments: mainComments.length,
+    }
   }
 
   async getFileRating(id: number) {

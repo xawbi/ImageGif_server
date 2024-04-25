@@ -21,7 +21,13 @@ export class UsersService {
   async findById(id: number) {
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .select(['user.id', 'user.username', 'user.role', 'user.openFavorites'])
+      .select([
+        'user.id',
+        'user.username',
+        'user.role',
+        'user.openFavorites',
+        'user.ban',
+      ])
       .where('user.id = :id', { id })
       .getOne()
     if (!user) {

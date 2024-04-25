@@ -10,6 +10,7 @@ import {
 import { AdminService } from './admin.service'
 import { AdminGuard, Role, Roles } from './guards/check-admin.guard'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { UserId } from '../decorators/user-id.decorator'
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
@@ -36,8 +37,18 @@ export class AdminController {
   @Patch('user/ban')
   @UseGuards(AdminGuard)
   @Roles(Role.Admin)
-  updateUserBan(@Query('ids') ids: string) {
-    return this.adminService.updateUserBan(ids)
+  updateUserBan(@Query('ids') ids: string, @UserId() userId: number) {
+    return this.adminService.updateUserBan(ids, userId)
+  }
+
+  @Patch('user/updateRole/:userId/:userRole')
+  @UseGuards(AdminGuard)
+  @Roles(Role.Admin)
+  updateUserRole(
+    @Param('userId') userId: string,
+    @Param('userRole') userRole: string,
+  ) {
+    return this.adminService.updateUserRole(userId, userRole)
   }
 
   @Patch('files/updateRestricted')

@@ -8,22 +8,19 @@ export class PublicController {
 
   @Get('files')
   getFiles(
-    @Query('type') fileType: FileType,
+    @Query('userId') userId: FileType,
+    @Query('all') allType: string,
     @Query('sort') fileSort: FileSort,
     @Query('page') page: number,
     @Query('per_page') per_page: number,
   ) {
-    return this.publicService.getFiles(fileSort, page, per_page, fileType)
-  }
-
-  @Get('/userFiles/:userId')
-  getUserFiles(
-    @Param('userId') userId: number,
-    @Query('sort') fileSort: FileSort,
-    @Query('page') page: number,
-    @Query('per_page') per_page: number,
-  ) {
-    return this.publicService.getFiles(fileSort, page, per_page, userId)
+    return this.publicService.getFiles(
+      userId,
+      allType,
+      fileSort,
+      page,
+      per_page,
+    )
   }
 
   @Post('searchPosts')
@@ -42,8 +39,17 @@ export class PublicController {
   }
 
   @Get(':id/comments')
-  getFileComments(@Param('id') fileId: number) {
-    return this.publicService.getFileComments(fileId)
+  getFileComments(
+    @Param('id') fileId: number,
+    @Query('page') page: number,
+    @Query('per_page') per_page: number,
+  ) {
+    return this.publicService.getFileComments(fileId, page, per_page)
+  }
+
+  @Get(':id/commentsLength')
+  getFileCommentsLength(@Param('id') fileId: number) {
+    return this.publicService.getFileCommentsLength(fileId)
   }
 
   @Get(':id/fileRating')

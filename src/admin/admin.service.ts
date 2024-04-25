@@ -4,7 +4,6 @@ import { FileEntity } from '../files/entities/file.entity'
 import { Repository } from 'typeorm'
 import { CommentEntity } from '../comments/entities/comment.entity'
 import { UserEntity } from '../users/entities/user.entity'
-import { isArray } from 'class-validator'
 
 @Injectable()
 export class AdminService {
@@ -30,17 +29,26 @@ export class AdminService {
     return await this.userEntityRepository.find()
   }
 
-  async updateUserBan(ids: string) {
+  async updateUserBan(ids: string, userId: number) {
     const idsArray = ids.split(',')
     const qb = this.userEntityRepository.createQueryBuilder('user')
     const user = await qb.where('id IN (:...ids)', { ids: idsArray }).getOne()
-    if (!user) {
+    if (!user || user.id === userId) {
       throw new UnauthorizedException('user not found')
     }
     await qb
       .update()
       .set({ ban: () => 'NOT ban' })
       .execute()
+  }
+
+  async updateUserRole(userId: string, userRole: string) {
+    const qb = this.userEntityRepository.createQueryBuilder('user')
+    const user = await qb.where('id = :userId', { userId }).getOne()
+    if (!user) {
+      throw new UnauthorizedException('user not found')
+    }
+    await qb.update().set({ role: userRole }).execute()
   }
 
   async updateRestricted(ids: string) {
