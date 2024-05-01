@@ -7,9 +7,17 @@ import { join } from 'path'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   app.useGlobalPipes(new ValidationPipe())
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')))
-  app.use('/avatars', express.static(join(__dirname, '..', 'avatars')))
-  app.enableCors({ credentials: true, origin: true })
+  app.setGlobalPrefix('api')
+  app.use('/api/uploads', express.static(join(__dirname, '..', 'uploads')))
+  app.use('/api/avatars', express.static(join(__dirname, '..', 'avatars')))
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'https://imagegif.ru',
+      'http://imagegif.ru',
+    ],
+    credentials: true,
+  })
   await app.listen(process.env.PORT)
 }
 
