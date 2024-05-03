@@ -43,9 +43,25 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto, activationCode: string) {
-    dto.password = await this.hashPassword(dto.password)
-    dto.activationCode = activationCode
-    return await this.userRepository.save(dto)
+    let user = await this.userRepository.findOne({
+      where: { email: dto.email },
+    })
+
+    if (user) {
+      // Пользователь с таким email уже существует, обновляем данные
+      user.activationCode = activationCode
+      user.password = await this.hashPassword(dto.password)
+      user.username = dto.username
+    } else {
+      // Пользователь с таким email не найден, создаем нового
+      user = this.userRepository.create({
+        ...dto,
+        activationCode,
+        password: await this.hashPassword(dto.password),
+      })
+    }
+
+    return await this.userRepository.save(user)
   }
 
   async update(dto: CreateUserDto, email: string) {
