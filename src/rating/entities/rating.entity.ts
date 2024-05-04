@@ -31,7 +31,11 @@ export class RatingEntity {
   @Column({ default: 0 })
   dislike: number
 
-  @ManyToOne(() => UserEntity, user => user.comment, { nullable: false })
+  @ManyToOne(() => UserEntity, user => user.comment, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user: UserEntity
 
   @ManyToOne(() => FileEntity, file => file.rating, {

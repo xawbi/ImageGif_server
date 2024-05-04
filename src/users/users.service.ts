@@ -47,13 +47,11 @@ export class UsersService {
       where: { email: dto.email },
     })
 
-    if (user) {
-      // Пользователь с таким email уже существует, обновляем данные
+    if (user && user.isEmailConfirmed === false) {
       user.activationCode = activationCode
       user.password = await this.hashPassword(dto.password)
       user.username = dto.username
     } else {
-      // Пользователь с таким email не найден, создаем нового
       user = this.userRepository.create({
         ...dto,
         activationCode,
