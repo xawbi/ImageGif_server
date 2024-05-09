@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Query, Res } from '@nestjs/common'
 import { PublicService } from './public.service'
-import { FileSort, FileType } from '../files/entities/file.entity'
+import { FileSort } from '../files/entities/file.entity'
 
 @Controller('public')
 export class PublicController {
@@ -8,7 +8,7 @@ export class PublicController {
 
   @Get('files')
   getFiles(
-    @Query('userId') userId: FileType,
+    @Query('userId') userId: number,
     @Query('all') allType: string,
     @Query('sort') fileSort: FileSort,
     @Query('page') page: number,

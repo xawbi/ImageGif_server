@@ -103,12 +103,7 @@ export class PublicService {
 
   async findFile(fileId: number) {
     const qbFile = this.fileEntityRepository.createQueryBuilder('file')
-
-    if (!qbFile) {
-      throw new NotFoundException(`File with id ${fileId} not found`)
-    }
-
-    return await qbFile
+    const file = await qbFile
       .leftJoin('file.user', 'user')
       .addSelect(['user.id', 'user.username', 'user.role'])
       .leftJoin('file.rating', 'fileRating')
@@ -127,6 +122,10 @@ export class PublicService {
       ])
       .leftJoinAndSelect('favorites.file', 'fileFavorite')
       .getOne()
+    if (!file) {
+      throw new NotFoundException(`File with id ${fileId} not found`)
+    }
+    return file
   }
 
   async getFileComments(
