@@ -84,4 +84,10 @@ export class UserEntity {
     nullable: false,
   })
   ban: boolean
+
+  @Column({ nullable: true })
+  newPasswordToken: string
+
+  @Column({ nullable: true })
+  lastPasswordResetEmailSent: Date
 }

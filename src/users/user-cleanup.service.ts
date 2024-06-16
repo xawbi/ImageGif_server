@@ -11,7 +11,7 @@ export class UserCleanupService {
     private repository: Repository<UserEntity>,
   ) {}
 
-  @Cron('0 0 * * 0') // Каждая неделя в воскресенье в полночь (00:00)
+  @Cron('0 0 * * 0')
   async removeInactiveUsers() {
     const oneWeekAgo = new Date()
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
@@ -20,5 +20,23 @@ export class UserCleanupService {
       isEmailConfirmed: false,
       createAt: LessThan(oneWeekAgo),
     })
+  }
+
+  @Cron('0 0 * * *')
+  async clearOldResetTokens() {
+    const oneDayAgo = new Date()
+    oneDayAgo.setDate(oneDayAgo.getDay() - 1)
+
+    const usersToUpdate = await this.repository.find({
+      where: {
+        lastPasswordResetEmailSent: LessThan(oneDayAgo),
+      },
+    })
+
+    for (const user of usersToUpdate) {
+      user.lastPasswordResetEmailSent = null
+      user.newPasswordToken = null
+      await this.repository.save(user)
+    }
   }
 }

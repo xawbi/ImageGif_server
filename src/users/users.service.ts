@@ -18,6 +18,12 @@ export class UsersService {
     })
   }
 
+  async findByToken(token: string) {
+    return this.userRepository.findOneBy({
+      newPasswordToken: token,
+    })
+  }
+
   async findById(id: number) {
     const user = await this.userRepository
       .createQueryBuilder('user')
@@ -62,7 +68,7 @@ export class UsersService {
     return await this.userRepository.save(user)
   }
 
-  async update(dto: CreateUserDto, email: string) {
+  async updateEmailConfirmed(email: string) {
     const user = await this.userRepository.findOneBy({
       email,
     })
@@ -71,6 +77,46 @@ export class UsersService {
     }
 
     user.isEmailConfirmed = true
+    await this.userRepository.update(user.id, user)
+  }
+
+  async updateNewPasswordToken(email: string, token: string) {
+    const user = await this.userRepository.findOneBy({
+      email,
+    })
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден')
+    }
+
+    user.lastPasswordResetEmailSent = new Date()
+    user.newPasswordToken = token
+    await this.userRepository.update(user.id, user)
+  }
+
+  async updatePassword(userId: number, newPassword: string) {
+    const user = await this.userRepository.findOneBy({
+      id: userId,
+    })
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден')
+    }
+
+    if (newPassword) user.password = await this.hashPassword(newPassword)
+    user.lastPasswordResetEmailSent = null
+    user.newPasswordToken = null
+    await this.userRepository.update(user.id, user)
+  }
+
+  async updateTokenAndDate(userId: number) {
+    const user = await this.userRepository.findOneBy({
+      id: userId,
+    })
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден')
+    }
+
+    user.lastPasswordResetEmailSent = null
+    user.newPasswordToken = null
     await this.userRepository.update(user.id, user)
   }
 }
