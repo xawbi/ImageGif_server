@@ -5,9 +5,17 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { UserEntity } from '../users/entities/user.entity'
 import { FileEntity } from '../files/entities/file.entity'
 import { CommentEntity } from '../comments/entities/comment.entity'
+import { FavoriteEntity } from '../favorites/entities/favorite.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, FileEntity, CommentEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      UserEntity,
+      FileEntity,
+      CommentEntity,
+      FavoriteEntity,
+    ]),
+  ],
   controllers: [AdminController],
   providers: [AdminService],
 })

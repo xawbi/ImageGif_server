@@ -4,6 +4,7 @@ import { FileEntity } from '../files/entities/file.entity'
 import { Repository } from 'typeorm'
 import { CommentEntity } from '../comments/entities/comment.entity'
 import { UserEntity } from '../users/entities/user.entity'
+import { FavoriteEntity } from '../favorites/entities/favorite.entity'
 
 @Injectable()
 export class AdminService {
@@ -14,6 +15,8 @@ export class AdminService {
     private commentEntityRepository: Repository<CommentEntity>,
     @InjectRepository(UserEntity)
     private userEntityRepository: Repository<UserEntity>,
+    @InjectRepository(FavoriteEntity)
+    private favoriteEntityRepository: Repository<FavoriteEntity>,
   ) {}
 
   getFilesPending(page: number, per_page: number) {
@@ -82,6 +85,12 @@ export class AdminService {
     )
 
     await qb.update().set({ restricted: 'private', reject: true }).execute()
+
+    await this.favoriteEntityRepository
+      .createQueryBuilder()
+      .where('fileId IN (:...ids)', { ids: idsArray })
+      .delete()
+      .execute()
   }
 
   async deleteFile(id: string) {
