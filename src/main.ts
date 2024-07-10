@@ -15,6 +15,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://imagegif.ru',
       'http://imagegif.ru',
+      'http://176.109.100.227:3000',
     ],
     credentials: true,
   })
